@@ -1,0 +1,26 @@
+vehicle_id,brand,model,year,category,fuel_type,transmission,engine_size,horsepower,mpg_city,mpg_highway,base_price,country
+1,Toyota,Camry,2022,Sedan,Gasoline,Automatic,2.5,203,28,39,25945,Japan
+2,Toyota,RAV4,2023,SUV,Hybrid,Automatic,2.5,219,41,38,29975,Japan
+3,Toyota,Tacoma,2023,Truck,Gasoline,Automatic,3.5,278,18,24,28100,Japan
+4,Honda,Civic,2022,Sedan,Gasoline,CVT,2.0,158,31,40,22550,Japan
+5,Honda,CR-V,2023,SUV,Gasoline,CVT,1.5,190,28,34,30355,Japan
+6,Honda,Accord,2023,Sedan,Hybrid,CVT,2.0,204,44,44,27895,Japan
+7,Ford,F-150,2022,Truck,Gasoline,Automatic,3.5,400,20,26,29290,USA
+8,Ford,Mustang,2023,Coupe,Gasoline,Manual,5.0,450,15,24,30920,USA
+9,Ford,Explorer,2023,SUV,Gasoline,Automatic,2.3,300,21,28,36760,USA
+10,Chevrolet,Silverado,2022,Truck,Gasoline,Automatic,5.3,355,16,23,32495,USA
+11,Chevrolet,Equinox,2023,SUV,Gasoline,Automatic,1.5,170,28,39,26800,USA
+12,BMW,3 Series,2023,Sedan,Gasoline,Automatic,2.0,255,26,36,41450,Germany
+13,BMW,X5,2022,SUV,Gasoline,Automatic,3.0,335,21,26,61700,Germany
+14,Mercedes-Benz,C-Class,2023,Sedan,Gasoline,Automatic,2.0,255,23,35,44650,Germany
+15,Mercedes-Benz,GLE,2022,SUV,Gasoline,Automatic,3.0,362,18,25,56800,Germany
+16,Hyundai,Elantra,2023,Sedan,Gasoline,CVT,2.0,147,31,41,21100,South Korea
+17,Hyundai,Tucson,2022,SUV,Hybrid,Automatic,1.6,226,38,38,28950,South Korea
+18,Nissan,Altima,2023,Sedan,Gasoline,CVT,2.5,182,27,38,24300,Japan
+19,Nissan,Rogue,2022,SUV,Gasoline,CVT,1.5,201,30,37,27600,Japan
+20,Tesla,Model 3,2023,Sedan,Electric,Automatic,0.0,358,,, 42990,USA
+21,Tesla,Model Y,2022,SUV,Electric,Automatic,0.0,384,,,54990,USA
+22,Kia,Sportage,2023,SUV,Gasoline,Automatic,2.5,187,25,32,26490,South Korea
+23,Kia,Telluride,2022,SUV,Gasoline,Automatic,3.8,291,20,26,35090,South Korea
+24,Jeep,Grand Cherokee,2022,SUV,Gasoline,Automatic,3.6,293,19,26,38120,USA
+25,Subaru,Outback,2023,SUV,Gasoline,CVT,2.5,182,26,33,28395,Japan

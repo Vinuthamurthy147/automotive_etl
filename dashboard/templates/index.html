@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Automotive Sales Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e40af, #7c3aed);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    header h1 { font-size: 1.5rem; font-weight: 700; color: #fff; }
+    header span { font-size: 0.85rem; color: #bfdbfe; }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+    /* KPI Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .kpi-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+    }
+    .kpi-card .label { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+    .kpi-card .value { font-size: 2rem; font-weight: 700; color: #60a5fa; margin-top: 0.25rem; }
+    .kpi-card .sub   { font-size: 0.75rem; color: #64748b; margin-top: 0.25rem; }
+
+    /* Charts grid */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .chart-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .chart-card h2 { font-size: 1rem; font-weight: 600; color: #cbd5e1; margin-bottom: 1rem; }
+    .chart-card canvas { width: 100% !important; }
+
+    /* Tables */
+    .table-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 1.5rem;
+    }
+    .table-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 1.5rem;
+      overflow-x: auto;
+    }
+    .table-card h2 { font-size: 1rem; font-weight: 600; color: #cbd5e1; margin-bottom: 1rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #0f172a;
+      color: #94a3b8;
+      font-weight: 600;
+      border-bottom: 1px solid #334155;
+    }
+    td { padding: 0.5rem 0.75rem; border-bottom: 1px solid #1e293b; color: #cbd5e1; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #263348; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .badge-blue   { background: #1d4ed8; color: #bfdbfe; }
+    .badge-green  { background: #065f46; color: #6ee7b7; }
+    .badge-purple { background: #6b21a8; color: #e9d5ff; }
+    .badge-orange { background: #92400e; color: #fde68a; }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #475569;
+      font-size: 0.8rem;
+    }
+    footer a { color: #60a5fa; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🚗 Automotive Sales Dashboard</h1>
+    <span>ETL Pipeline &nbsp;|&nbsp; FastAPI + Flask &nbsp;|&nbsp; MySQL</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="label">Total Revenue</div>
+      <div class="value">${{ "${:,.0f}".format(total_revenue) }}</div>
+      <div class="sub">All time</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">Total Sales</div>
+      <div class="value">{{ total_sales }}</div>
+      <div class="sub">Transactions</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">Avg Sale Price</div>
+      <div class="value">${{ "${:,.0f}".format(avg_price) }}</div>
+      <div class="sub">Per vehicle</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">Brands</div>
+      <div class="value">{{ brand_count }}</div>
+      <div class="sub">Tracked</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-grid">
+
+    <!-- Revenue by Brand -->
+    <div class="chart-card">
+      <h2>Revenue by Brand</h2>
+      <canvas id="brandChart" height="220"></canvas>
+    </div>
+
+    <!-- Fuel Type Breakdown -->
+    <div class="chart-card">
+      <h2>Sales by Fuel Type</h2>
+      <canvas id="fuelChart" height="220"></canvas>
+    </div>
+
+    <!-- Monthly Sales Trend -->
+    <div class="chart-card" style="grid-column: 1 / -1;">
+      <h2>Monthly Sales Trend (2023)</h2>
+      <canvas id="monthlyChart" height="120"></canvas>
+    </div>
+
+  </div>
+
+  <!-- Tables -->
+  <div class="table-grid">
+
+    <!-- Top Models -->
+    <div class="table-card">
+      <h2>🏆 Top 5 Best-Selling Models</h2>
+      <table>
+        <thead>
+          <tr><th>Brand</th><th>Model</th><th>Sales</th><th>Revenue</th></tr>
+        </thead>
+        <tbody>
+          {% for m in top_models %}
+          <tr>
+            <td>{{ m.brand }}</td>
+            <td>{{ m.model }} ({{ m.year }})</td>
+            <td>{{ m.total_sales }}</td>
+            <td>${{ "{:,.0f}".format(m.total_revenue) }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4" style="color:#64748b">No data</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- State Revenue -->
+    <div class="table-card">
+      <h2>📍 Top States by Revenue</h2>
+      <table>
+        <thead>
+          <tr><th>State</th><th>Sales</th><th>Revenue</th></tr>
+        </thead>
+        <tbody>
+          {% for s in state_revenue %}
+          <tr>
+            <td>{{ s.dealer_state }}</td>
+            <td>{{ s.total_sales }}</td>
+            <td>${{ "{:,.0f}".format(s.total_revenue) }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3" style="color:#64748b">No data</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Brand Summary -->
+    <div class="table-card" style="grid-column: 1 / -1;">
+      <h2>📊 Brand Performance Summary</h2>
+      <table>
+        <thead>
+          <tr><th>Brand</th><th>Country</th><th>Sales</th><th>Revenue</th><th>Avg Price</th><th>Avg Discount</th></tr>
+        </thead>
+        <tbody>
+          {% for b in brand_summary %}
+          <tr>
+            <td><strong>{{ b.brand }}</strong></td>
+            <td>{{ b.country or '—' }}</td>
+            <td>{{ b.total_sales }}</td>
+            <td>${{ "{:,.0f}".format(b.total_revenue) }}</td>
+            <td>${{ "{:,.0f}".format(b.avg_sale_price) }}</td>
+            <td>
+              {% if b.avg_discount_pct %}
+                <span class="badge {% if b.avg_discount_pct > 5 %}badge-orange{% else %}badge-green{% endif %}">
+                  {{ b.avg_discount_pct }}%
+                </span>
+              {% else %}—{% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" style="color:#64748b">No data — run the ETL pipeline first.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  Automotive ETL Pipeline &amp; Analytics API &nbsp;|&nbsp;
+  Built with Python · FastAPI · Flask · MySQL · Pandas · NumPy &nbsp;|&nbsp;
+  <a href="http://localhost:8000/docs" target="_blank">API Docs ↗</a>
+</footer>
+
+<script>
+  const COLORS = [
+    '#60a5fa','#34d399','#f472b6','#fb923c','#a78bfa',
+    '#facc15','#38bdf8','#4ade80','#f87171','#c084fc'
+  ];
+
+  // Brand Revenue Chart
+  const brandData = {{ brand_summary | tojson }};
+  new Chart(document.getElementById('brandChart'), {
+    type: 'bar',
+    data: {
+      labels: brandData.map(b => b.brand),
+      datasets: [{
+        label: 'Revenue ($)',
+        data: brandData.map(b => b.total_revenue),
+        backgroundColor: COLORS.slice(0, brandData.length),
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } },
+        y: { ticks: { color: '#94a3b8', callback: v => '$' + (v/1000).toFixed(0) + 'k' }, grid: { color: '#334155' } }
+      }
+    }
+  });
+
+  // Fuel Type Doughnut
+  const fuelData = {{ fuel_breakdown | tojson }};
+  new Chart(document.getElementById('fuelChart'), {
+    type: 'doughnut',
+    data: {
+      labels: fuelData.map(f => f.fuel_type),
+      datasets: [{
+        data: fuelData.map(f => f.total_sales),
+        backgroundColor: COLORS.slice(0, fuelData.length),
+        hoverOffset: 8,
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { position: 'right', labels: { color: '#94a3b8', padding: 16 } }
+      }
+    }
+  });
+
+  // Monthly Trend
+  const monthlyData = {{ monthly_sales | tojson }};
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  new Chart(document.getElementById('monthlyChart'), {
+    type: 'line',
+    data: {
+      labels: monthlyData.map(m => monthNames[m.month - 1]),
+      datasets: [
+        {
+          label: 'Revenue ($)',
+          data: monthlyData.map(m => m.total_revenue),
+          borderColor: '#60a5fa',
+          backgroundColor: 'rgba(96,165,250,0.15)',
+          tension: 0.4,
+          fill: true,
+          yAxisID: 'yRevenue',
+        },
+        {
+          label: 'Sales Count',
+          data: monthlyData.map(m => m.total_sales),
+          borderColor: '#34d399',
+          backgroundColor: 'transparent',
+          tension: 0.4,
+          borderDash: [5, 4],
+          yAxisID: 'ySales',
+        }
+      ]
+    },
+    options: {
+      plugins: { legend: { labels: { color: '#94a3b8' } } },
+      scales: {
+        x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+        yRevenue: {
+          position: 'left',
+          ticks: { color: '#60a5fa', callback: v => '$' + (v/1000).toFixed(0) + 'k' },
+          grid: { color: '#334155' }
+        },
+        ySales: {
+          position: 'right',
+          ticks: { color: '#34d399' },
+          grid: { drawOnChartArea: false }
+        }
+      }
+    }
+  });
+</script>
+</body>
+</html>
